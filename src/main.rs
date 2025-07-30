@@ -1,10 +1,19 @@
 mod cmd;
+mod shell;
+
+use std::process::ExitCode;
 
 use clap::Parser;
+use cmd::burrow;
 use cmd::cli::Args;
-use cmd::operations::processPaths;
 
-fn main() {
+fn main() -> ExitCode {
     let args = Args::parse();
-    processPaths(args.paths);
+
+    if let Err(e) = burrow::run(args.paths) {
+        eprintln!("Error: {}", e);
+        ExitCode::FAILURE
+    } else {
+        ExitCode::SUCCESS
+    }
 }

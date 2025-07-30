@@ -1,9 +1,10 @@
 #![allow(non_snake_case, non_upper_case_globals)]
-use std::path::Path;
+use std::error::Error;
 use std::fs;
 use std::io::{self, Write};
+use std::path::Path;
 
-pub fn processPaths(paths: Vec<String>) {
+pub fn run(paths: Vec<String>) -> Result<(), Box<dyn Error>> {
     for pathStr in paths {
         let path = Path::new(&pathStr);
 
@@ -62,4 +63,5 @@ pub fn processPaths(paths: Vec<String>) {
             }
         }
     }
+    Ok(())
 }

@@ -1,6 +1,20 @@
 [package]
+authors = ["Evandro Lourenço Limeira <evan.limeira@gmail.com>"]
+categories = ["command-line-utilities", "filesystem"]
+description = "A smarter mkdir -p/touch fusion"
+homepage = "https://github.com/elaurentium/burrow"
+keywords = ["cli", "filesystem", "shell", "tool", "utility"]
 name = "burrow"
 version = "0.1.0"
 edition = "2024"
+repository = "https://github.com/elaurentium/burrow"
 
 [dependencies]
+anyhow = "1.0.98"
+askama = "0.14.0"
+clap = { version = "4.0", features = ["derive"] }
+fmt = "0.1.0"
+
+[[bin]]
+name = "burrow"
+path = "src/main.rs"

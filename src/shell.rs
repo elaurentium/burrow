@@ -1,8 +1,11 @@
 #![allow(non_snake_case, non_upper_case_globals)]
 
+use crate::cmd::cmd::InitHook;
+
 #[derive(Debug, Eq, PartialEq)]
 pub struct Opts<'a> {
     pub cmd: Option<&'a str>,
+    pub hook: InitHook,
     pub echo: bool
 }
 
@@ -22,12 +25,5 @@ macro_rules! make_template {
     };
 }
 
-//make_template!(Bash, "bash.txt");
-//make_template!(Elvish, "elvish.txt");
-//make_template!(Fish, "fish.txt");
-//make_template!(Nushell, "nushell.txt");
-//make_template!(Posix, "posix.txt");
-//make_template!(Powershell, "powershell.txt");
-//make_template!(Tcsh, "tcsh.txt");
-//make_template!(Xonsh, "xonsh.txt");
-//make_template!(Zsh, "zsh.txt");
+make_template!(Bash, "bash.txt");
+make_template!(Zsh, "zsh.txt");

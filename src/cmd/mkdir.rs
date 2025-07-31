@@ -2,11 +2,18 @@
 use std::error::Error;
 use std::fs;
 use std::io::{self, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
-pub fn run(paths: Vec<String>) -> Result<(), Box<dyn Error>> {
+
+pub fn run(paths: Vec<PathBuf>) -> Result<(), Box<dyn Error>> {
+
     for pathStr in paths {
         let path = Path::new(&pathStr);
+
+        if path.exists() {
+            writeln!(io::stdout(), "Path already exists: {}", path.display())?;
+            continue;
+        }
 
         if let Some(parent) = path.parent() {
             if !parent.exists() {
@@ -23,12 +30,13 @@ pub fn run(paths: Vec<String>) -> Result<(), Box<dyn Error>> {
             }
         }
 
-        if pathStr.ends_with("/") {
-            let dirPath = Path::new(&pathStr[..pathStr.len() - 1]);
+        let strBuffer = pathStr.to_string_lossy();
+        if strBuffer.ends_with("/") {
+            let dirPath = Path::new(&strBuffer[..strBuffer.len() - 1]);
             if !dirPath.exists() {
                 match fs::create_dir(dirPath) {
                     Ok(_) => {
-                        writeln!(io::stdout(), "Created directory: {}", dirPath.display()).unwrap()
+                        writeln!(io::stdout()).unwrap()
                     }
                     Err(e) => writeln!(
                         io::stderr(),
@@ -49,7 +57,7 @@ pub fn run(paths: Vec<String>) -> Result<(), Box<dyn Error>> {
         } else {
             if !path.exists() {
                 match fs::File::create(path) {
-                    Ok(_) => writeln!(io::stdout(), "Created file: {}", path.display()).unwrap(),
+                    Ok(_) => writeln!(io::stdout()).unwrap(),
                     Err(e) => writeln!(
                         io::stderr(),
                         "Error creating file {}: {}",

@@ -7,6 +7,7 @@ use std::process::ExitCode;
 use clap::Parser;
 use cmd::cli::Args;
 use cmd::mkdir;
+use init::init;
 
 
 fn main() -> ExitCode {

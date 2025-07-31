@@ -2,13 +2,12 @@
 use std::error::Error;
 use std::fs;
 use std::io::{self, Write};
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 
 
 pub fn run(paths: Vec<PathBuf>) -> Result<(), Box<dyn Error>> {
 
     for path in paths {
-
         if path.exists() {
             writeln!(io::stdout(), "Path already exists: {}", path.display())?;
             continue;

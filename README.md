@@ -23,3 +23,8 @@ b src/bin/main.rs
 b src/lib.rs tests/
 b src/ tests/ README.md
 ```
+
+## Instalation
+```
+brew install burrow
+```

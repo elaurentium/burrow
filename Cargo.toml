@@ -22,13 +22,15 @@ path = "src/main.rs"
 [general]
 dirs = ["templates"]
 
-[package.metadata.deb]
-assets = [
-    "target/release/burrow",
-    "usr/bin",
-    "755",
-]
-
 [target.x86_64-unknown-linux-gnu]
 linker = "x86_64-linux-musl-gcc"
 
+[package.metadata.deb]
+maintainer = "Evandro Lourenço Limeira <evan.limeira@gmail.com>"
+description = "Directory/File Creation CLI Tool"
+depends = "libc6 (>= 2.2.5)"
+section = "utils"
+
+[package.metadata.generate-rpm]
+release = "0.0.1"
+summary = "Directory/File Creation CLI Tool"

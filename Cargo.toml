@@ -16,7 +16,7 @@ clap = { version = "4.0", features = ["derive"] }
 fmt = "0.1.0"
 
 [[bin]]
-name = "burrow"
+name = "b"
 path = "src/main.rs"
 
 [general]

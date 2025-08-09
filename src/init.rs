@@ -1,3 +1,4 @@
+#[warn(dead_code)]
 use anyhow::{Result, anyhow};
 use askama::Template;
 

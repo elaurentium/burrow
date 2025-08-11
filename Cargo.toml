@@ -13,6 +13,7 @@ repository = "https://github.com/elaurentium/burrow"
 [dependencies]
 anyhow = "1.0.98"
 askama = { version="0.14.0", features = ["config"] }
+cargo-deb = "3.4.1"
 clap = { version = "4.0", features = ["derive"] }
 fmt = "0.1.0"
 

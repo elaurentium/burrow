@@ -3,7 +3,7 @@
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum InitHook {
     None,
-    Prompt,
-    Pwd
+    //Prompt,
+    //Pwd
 }
 

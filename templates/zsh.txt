@@ -1,8 +1,8 @@
-BURROW_CMD="{{ cmd.unwrap_or("b") }}"
+BURROW_CMD="{{ cmd.clone().replace("", "b") }}"
 
 function _burrow_hook() {
     if [[ -n "${BURROW_CMD}" ]]; then
-        eval "$(${BURROW_CMD} hook prompt)"
+        eval "$(${BURROW_CMD} hook prompt &> /dev/null)"
     fi
 }
 

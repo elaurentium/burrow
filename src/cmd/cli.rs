@@ -7,4 +7,8 @@ use clap::{Parser, Subcommand};
 pub struct Args {
     #[arg(required = true)]
     pub paths: Vec<PathBuf>,
+    #[arg(short, long, default_value = "zsh")]
+    pub shell: String,
+    #[arg(short, long)]
+    pub flags: bool
 }

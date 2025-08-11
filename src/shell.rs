@@ -3,8 +3,8 @@
 use crate::cmd::cmd::InitHook;
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct Opts<'a> {
-    pub cmd: Option<&'a str>,
+pub struct Opts {
+    pub cmd: String,
     pub hook: InitHook,
     pub echo: bool
 }
@@ -14,10 +14,10 @@ macro_rules! make_template {
     ($name:ident, $path:expr) => {
         #[derive(::std::fmt::Debug, ::askama::Template)]
         #[template(path = $path)]
-        pub struct $name<'a>(pub &'a self::Opts<'a>);
+        pub struct $name<'a>(pub &'a self::Opts);
 
         impl<'a> ::std::ops::Deref for $name<'a> {
-            type Target = self::Opts<'a>;
+            type Target = self::Opts;
             fn deref(&self) -> &Self::Target {
                 self.0
             }

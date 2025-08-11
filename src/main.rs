@@ -25,8 +25,8 @@ fn main() -> ExitCode {
     };
 
     match init(&opts.cmd, &opts) {
-        Ok(output) => {
-            println!("{}", output);
+        Ok(_output) => {
+            //println!("{}", output);
             ExitCode::SUCCESS
         }
         Err(e) => {

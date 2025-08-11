@@ -33,6 +33,10 @@ depends = "libc6 (>= 2.2.5)"
 section = "utils"
 
 [package.metadata.generate-rpm]
-release = "0.0.1"
-summary = "Directory/File Creation CLI Tool"
-license = "MIT"
+assets = [
+    [
+        "target/release/zoxide",
+        "usr/bin/",
+        "755",
+    ],
+]

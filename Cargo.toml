@@ -36,7 +36,7 @@ section = "utils"
 assets = [
     [
         "target/release/burrow",
-        "usr/bin/",
+        "usr/bin/burrow",
         "755",
     ],
 ]

@@ -35,7 +35,7 @@ section = "utils"
 [package.metadata.generate-rpm]
 assets = [
     [
-        "target/release/zoxide",
+        "target/release/burrow",
         "usr/bin/",
         "755",
     ],

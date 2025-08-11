@@ -7,6 +7,7 @@ keywords = ["cli", "filesystem", "shell", "tool", "utility"]
 name = "burrow"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
 repository = "https://github.com/elaurentium/burrow"
 
 [dependencies]
@@ -34,3 +35,4 @@ section = "utils"
 [package.metadata.generate-rpm]
 release = "0.0.1"
 summary = "Directory/File Creation CLI Tool"
+license = "MIT"

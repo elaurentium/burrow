@@ -30,7 +30,7 @@ b src/ tests/ README.md
 brew install burrow
 
 ##Cargo instalation
-cargo install burrow
+cargo install burrow-io
 
 ##Ubuntu/Debian
 sudo apt install burrow

@@ -17,14 +17,12 @@ jobs:
       - run: cargo install cargo-deb cargo-generate-rpm
       - run: cargo build --release
       - run: cargo deb
-      - run: cargo generate-rpm
       - run: tar -czf burrow-linux.tar.gz -C target/release burrow
       - uses: softprops/action-gh-release@v1
         with:
           files: |
             burrow-linux.tar.gz
             target/debian/*.deb
-            target/generate-rpm/*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

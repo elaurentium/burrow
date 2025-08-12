@@ -32,6 +32,6 @@ brew install burrow
 ##Cargo instalation
 cargo install burrow
 
-##Linux
+##Ubuntu/Debian
 sudo apt install burrow
 ```

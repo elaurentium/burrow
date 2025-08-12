@@ -30,7 +30,7 @@ b src/ tests/ README.md
 brew install burrow
 
 ##Cargo instalation
-cargo install --git https://github.com/elaurentium/burrow
+cargo install burrow
 
 ##Linux
 sudo apt install burrow

@@ -26,5 +26,12 @@ b src/ tests/ README.md
 
 ## Instalation
 ```
+##MacOs
 brew install burrow
+
+##Cargo instalation
+cargo install --git https://github.com/elaurentium/burrow
+
+##Linux
+sudo apt install burrow
 ```

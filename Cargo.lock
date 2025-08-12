@@ -3,17 +3,6 @@
 version = 4
 
 [[package]]
-name = "Burrow"
-version = "0.0.1"
-dependencies = [
- "anyhow",
- "askama",
- "cargo-deb",
- "clap",
- "fmt",
-]
-
-[[package]]
 name = "aho-corasick"
 version = "1.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -146,6 +135,17 @@ name = "bumpalo"
 version = "3.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "46c5e41b57b8bba42a04676d81cb89e9ee8e859a1a66f80a5a72e1cb76b34d43"
+
+[[package]]
+name = "burrow-io"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "askama",
+ "cargo-deb",
+ "clap",
+ "fmt",
+]
 
 [[package]]
 name = "cargo-deb"

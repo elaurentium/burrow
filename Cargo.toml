@@ -21,6 +21,10 @@ fmt = "0.1.0"
 name = "burrow"
 path = "src/main.rs"
 
+[[bin]]
+name = "b"
+path = "src/main.rs"
+
 [general]
 dirs = ["templates"]
 

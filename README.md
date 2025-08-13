@@ -26,14 +26,6 @@ b src/ tests/ README.md
 
 ## Instalation
 ```
-##MacOs
-brew install burrow
-```
-```
 ##Cargo instalation
 cargo install burrow-io
-```
-```
-##Ubuntu/Debian
-sudo apt install burrow
 ```

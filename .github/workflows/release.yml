@@ -13,8 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux, darwin]
+        goos: [linux, darwin, windows]
         goarch: [amd64, arm64]
+        exclude:
+          - goos: windows
+            goarch: arm64
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,8 +36,11 @@ jobs:
         run: |
           mkdir -p dist
           BIN="burrow-${GOOS}-${GOARCH}"
+          if [ "${GOOS}" = "windows" ]; then
+            BIN="${BIN}.exe"
+          fi
           echo "Building ${BIN}..."
-          go build -trimpath -ldflags="-s -w" -o "dist/${BIN}" ./cmd/burrow
+          go build -trimpath -ldflags="-s -w" -o "dist/${BIN}" ./cmd
           echo "File info:"
           file "dist/${BIN}" || true
           ls -lh dist/
@@ -45,6 +51,32 @@ jobs:
           shasum -a 256 * > SHA256SUMS
           cat SHA256SUMS
 
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: burrow-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist_all
+
+      - name: Flatten artifacts
+        run: |
+          mkdir -p upload
+          find dist_all -type f -exec mv {} upload/ \;
+          ls -lh upload/
+
+      - name: List to check
+        run: |
+          echo "Files to upload:"
+          ls -l upload/
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -52,9 +84,11 @@ jobs:
           name: ${{ github.ref_name }}
           draft: false
           prerelease: false
+          overwrite: true
           files: |
-            dist/burrow-linux-amd64
-            dist/burrow-linux-arm64
-            dist/burrow-darwin-amd64
-            dist/burrow-darwin-arm64
-            dist/SHA256SUMS
+            upload/burrow-linux-amd64
+            upload/burrow-linux-arm64
+            upload/burrow-darwin-amd64
+            upload/burrow-darwin-arm64
+            upload/burrow-windows-amd64.exe
+            upload/SHA256SUMS

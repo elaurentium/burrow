@@ -1,7 +1,7 @@
 <h1 align="center">
-  <img src="docs/static/burrow-logo.png" height="180px" style="height:180px; background-color: transparent;">
+  <img src="https://media.tenor.com/TCMWkxIkF9IAAAAj/dancing-gopher.gif" height="180px" style="height:180px; background-color: transparent;">
   <br>
-  Burrow
+  <span style="color: #B3D9FF;">Burrow</span>
 </h1>
 
 <div align="center">

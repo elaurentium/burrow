@@ -1,4 +1,4 @@
-BURROW_CMD="{{ cmd.clone().replace("", "b") }}"
+BURROW_CMD="{{ Default .Cmd "b" }}"
 
 _burrow_hook() {
     if [ -n "${BURROW_CMD}" ]; then

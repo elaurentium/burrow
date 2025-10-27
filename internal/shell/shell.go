@@ -33,8 +33,10 @@ import (
 )
 
 var (
+	//go:embed../../templates/bash.txt
 	bashTemplate string
-	zshTemplate  string
+	//go:embed../../templates/zsh.txt
+	zshTemplate string
 )
 
 type Opts struct {
@@ -64,28 +66,39 @@ func (st *ShellTemplate) Execute() (string, error) {
 	return buf.String(), nil
 }
 
+func (b *Bash) Render() (string, error) { return b.Execute() }
+func (z *Zsh) Render() (string, error)  { return z.Execute() }
+
+func Default(val, fallback string) string {
+	if strings.TrimSpace(val) == "" {
+		return fallback
+	}
+	return val
+}
+
+func Replace(s, old, new string) string {
+	return strings.ReplaceAll(s, old, new)
+}
+
+func funcMap() template.FuncMap {
+	return template.FuncMap{
+		"Default": Default,
+		"Replace": Replace,
+	}
+}
+
 func NewBash(opts *Opts) (*Bash, error) {
-	tmpl, err := template.New("bash").Parse(bashTemplate)
+	tmpl, err := template.New("bash").Funcs(funcMap()).Parse(bashTemplate)
 	if err != nil {
 		return nil, err
 	}
-	return &Bash{
-		ShellTemplate: ShellTemplate{
-			Opts: opts,
-			tmpl: tmpl,
-		},
-	}, nil
+	return &Bash{ShellTemplate{Opts: opts, tmpl: tmpl}}, nil
 }
 
 func NewZsh(opts *Opts) (*Zsh, error) {
-	tmpl, err := template.New("zsh").Parse(zshTemplate)
+	tmpl, err := template.New("zsh").Funcs(funcMap()).Parse(zshTemplate)
 	if err != nil {
 		return nil, err
 	}
-	return &Zsh{
-		ShellTemplate: ShellTemplate{
-			Opts: opts,
-			tmpl: tmpl,
-		},
-	}, nil
+	return &Zsh{ShellTemplate{Opts: opts, tmpl: tmpl}}, nil
 }

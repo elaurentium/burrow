@@ -33,9 +33,9 @@ import (
 
 func runCreate() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:   "b <path> [paths...]",
 		Short: "Directory/File Creation CLI Tool",
-		Args:  cobra.MinimumNArgs(1),
+		Long:  "Create directories and files quickly. Paths with extensions are treated as files; others as directories.",
+		Args:  cobra.ArbitraryArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
 			return create.Create(args)
 		},

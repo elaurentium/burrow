@@ -66,7 +66,7 @@ func Create(paths []string) error {
 				fmt.Fprintln(os.Stdout)
 			}
 		} else {
-			if err := os.Mkdir(path, 0755); err != nil {
+			if err := os.MkdirAll(path, 0755); err != nil {
 				fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", path, err)
 			} else {
 				fmt.Fprintln(os.Stdout)

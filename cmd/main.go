@@ -34,9 +34,7 @@ import (
 )
 
 func main() {
-	os.Args = append([]string{"b"}, compatibility.Convert(os.Args)...)
-
 	if err := burrow.Execute(); err != nil {
-		os.Exit(1)
+		os.Args = append([]string{""}, compatibility.Convert(os.Args[1:])...)
 	}
 }

@@ -28,7 +28,7 @@ package compatibility
 
 func Convert(args []string) []string {
 	var rootFlags []string
-	command := []string{"burrow"}
+	command := []string{""}
 
 	for _, arg := range args {
 		switch arg {

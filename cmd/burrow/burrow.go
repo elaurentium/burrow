@@ -27,15 +27,17 @@
 package burrow
 
 import (
-	"github.com/spf13/cobra"
 	create "github.com/elaurentium/burrow/internal/fs"
+	"github.com/elaurentium/burrow/internal/helper"
+	"github.com/spf13/cobra"
 )
 
 func burrow() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:   "b <path> [paths...]",
-		Short: "Directory/File Creation CLI Tool",
-		Args:  cobra.ArbitraryArgs,
+		Version: helper.Version,
+		Use:     helper.Usage,
+		Short:   "Directory/File Creation CLI Tool",
+		Args:    cobra.ArbitraryArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
 			return create.Create(args)
 		},

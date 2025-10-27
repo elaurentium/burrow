@@ -21,3 +21,8 @@ b src/main.go
 #  |            output
 #   main.go
 ```
+
+# Installation
+```bash
+curl -fsSL https://raw.githubusercontent.com/elaurentium/burrow/main/install.sh | bash
+```

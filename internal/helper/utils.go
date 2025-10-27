@@ -26,3 +26,8 @@
 
 package helper
 
+const (
+	Name = "Burrow"
+	Version = "0.0.1"
+	Usage = "Burrow"
+)

@@ -62,14 +62,10 @@ func Create(paths []string) error {
 		if filepath.Ext(path) != "" {
 			if _, err := os.Create(path); err != nil {
 				fmt.Fprintf(os.Stderr, "Error creating file %s: %v\n", path, err)
-			} else {
-				fmt.Fprintln(os.Stdout)
 			}
 		} else {
 			if err := os.MkdirAll(path, 0755); err != nil {
 				fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", path, err)
-			} else {
-				fmt.Fprintln(os.Stdout)
 			}
 		}
 	}

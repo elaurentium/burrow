@@ -1,0 +1,10 @@
+BURROW_CMD="{{ cmd.clone().replace("", "b") }}"
+
+function _burrow_hook() {
+    if [[ -n "${BURROW_CMD}" ]]; then
+        eval "$(${BURROW_CMD} hook prompt &> /dev/null)"
+    fi
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _burrow_hook

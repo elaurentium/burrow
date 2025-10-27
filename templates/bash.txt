@@ -1,0 +1,11 @@
+BURROW_CMD="{{ cmd.clone().replace("", "b") }}"
+
+_burrow_hook() {
+    if [ -n "${BURROW_CMD}" ]; then
+        eval "$(${BURROW_CMD} hook prompt &> /dev/null)"
+    fi
+}
+
+if [[ $- == *i* ]]; then
+    PROMPT_COMMAND="_burrow_hook; $PROMPT_COMMAND"
+fi

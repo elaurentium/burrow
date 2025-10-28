@@ -29,11 +29,9 @@ package fs
 import (
 	"os"
 	"time"
-
-	"golang.org/x/sys/unix"
 )
 
-type FileStat struct {
+type Stat_t struct {
 	Dev     uint64
 	Ino     uint64
 	Mode    uint32 // include type + permissions (bits S_IF* + 0777)
@@ -54,25 +52,25 @@ type CreateFs interface {
 	Create(paths []string) error
 }
 
-func GetFileStat(path string) (FileStat, error) {
-	var st unix.Stat_t
-	if err := unix.Lstat(path, &st); err != nil {
-		return FileStat{Path: path}, err
+func GetFileStat(path string) (Stat_t, error) {
+	info, err := os.Lstat(path)
+	if  err != nil {
+		return Stat_t{Path: path}, err
 	}
-	return FileStat{
-		Dev:     uint64(st.Dev),
-		Ino:     st.Ino,
-		Mode:    uint32(st.Mode),
-		Nlink:   uint64(st.Nlink),
-		Uid:     st.Uid,
-		Gid:     st.Gid,
-		Rdev:    uint64(st.Rdev),
-		Size:    st.Size,
-		Blksize: int64(st.Blksize),
-		Blocks:  st.Blocks,
-		Atime:   time.Unix(int64(st.Atim.Sec), int64(st.Atim.Nsec)),
-		Mtime:   time.Unix(int64(st.Mtim.Sec), int64(st.Mtim.Nsec)),
-		Ctime:   time.Unix(int64(st.Ctim.Sec), int64(st.Ctim.Nsec)),
+	return Stat_t{
+		Dev:     0,
+		Ino:     0,
+		Mode:    uint32(info.Mode()),
+		Nlink:   0,
+		Uid:     0,
+		Gid:     0,
+		Rdev:    0,
+		Size:    info.Size(),
+		Blksize: 0,
+		Blocks:  0,
+		Atime:   info.ModTime(),
+		Mtime:   info.ModTime(),
+		Ctime:   info.ModTime(),
 		Path:    path,
 	}, nil
 }

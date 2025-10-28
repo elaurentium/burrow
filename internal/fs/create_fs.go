@@ -62,7 +62,7 @@ func GetFileStat(path string) (FileStat, error) {
 	return FileStat{
 		Dev:     uint64(st.Dev),
 		Ino:     st.Ino,
-		Mode:    st.Mode,
+		Mode:    uint32(st.Mode),
 		Nlink:   uint64(st.Nlink),
 		Uid:     st.Uid,
 		Gid:     st.Gid,

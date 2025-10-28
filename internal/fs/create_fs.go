@@ -27,48 +27,61 @@
 package fs
 
 import (
-	"fmt"
 	"os"
-	"path/filepath"
+	"time"
+
+	"golang.org/x/sys/unix"
 )
 
-type Args struct {
-	Paths []string
-	Shell string
-	Flags bool
+type FileStat struct {
+	Dev     uint64
+	Ino     uint64
+	Mode    uint32 // include type + permissions (bits S_IF* + 0777)
+	Nlink   uint64
+	Uid     uint32
+	Gid     uint32
+	Rdev    uint64
+	Size    int64
+	Blksize int64
+	Blocks  int64
+	Atime   time.Time
+	Mtime   time.Time
+	Ctime   time.Time
+	Path    string
 }
 
 type CreateFs interface {
 	Create(paths []string) error
 }
 
-func Create(paths []string) error {
+func GetFileStat(path string) (FileStat, error) {
+	var st unix.Stat_t
+	if err := unix.Lstat(path, &st); err != nil {
+		return FileStat{Path: path}, err
+	}
+	return FileStat{
+		Dev:     uint64(st.Dev),
+		Ino:     st.Ino,
+		Mode:    st.Mode,
+		Nlink:   uint64(st.Nlink),
+		Uid:     st.Uid,
+		Gid:     st.Gid,
+		Rdev:    uint64(st.Rdev),
+		Size:    st.Size,
+		Blksize: int64(st.Blksize),
+		Blocks:  st.Blocks,
+		Atime:   time.Unix(int64(st.Atim.Sec), int64(st.Atim.Nsec)),
+		Mtime:   time.Unix(int64(st.Mtim.Sec), int64(st.Mtim.Nsec)),
+		Ctime:   time.Unix(int64(st.Ctim.Sec), int64(st.Ctim.Nsec)),
+		Path:    path,
+	}, nil
+}
+
+func Create(paths []string, perm os.FileMode) error {
 	for _, path := range paths {
-		if _, err := os.Stat(path); err == nil {
-			fmt.Fprintf(os.Stdout, "Path already exists: %s\n", path)
-			continue
-		}
-
-		parent := filepath.Dir(path)
-		if parent != "." && parent != "" {
-			if _, err := os.Stat(parent); os.IsNotExist(err) {
-				if err := os.MkdirAll(parent, 0755); err != nil {
-					fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", parent, err)
-					continue
-				}
-			}
-		}
-
-		if filepath.Ext(path) != "" {
-			if _, err := os.Create(path); err != nil {
-				fmt.Fprintf(os.Stderr, "Error creating file %s: %v\n", path, err)
-			}
-		} else {
-			if err := os.MkdirAll(path, 0755); err != nil {
-				fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", path, err)
-			}
+		if err := os.MkdirAll(path, perm); err != nil {
+			return err
 		}
 	}
-
 	return nil
 }

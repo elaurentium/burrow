@@ -27,6 +27,8 @@
 package burrow
 
 import (
+	"os"
+
 	create "github.com/elaurentium/burrow/internal/fs"
 	"github.com/spf13/cobra"
 )
@@ -37,7 +39,7 @@ func runCreate() *cobra.Command {
 		Long:  "Create directories and files quickly. Paths with extensions are treated as files; others as directories.",
 		Args:  cobra.ArbitraryArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
-			return create.Create(args)
+			return create.Create(args, os.FileMode(0755))
 		},
 	}
 

@@ -27,6 +27,8 @@
 package burrow
 
 import (
+	"os"
+
 	create "github.com/elaurentium/burrow/internal/fs"
 	"github.com/elaurentium/burrow/internal/helper"
 	"github.com/spf13/cobra"
@@ -39,7 +41,7 @@ func burrow() *cobra.Command {
 		Short:   "Directory/File Creation CLI Tool",
 		Args:    cobra.ArbitraryArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
-			return create.Create(args)
+			return create.Create(args, os.FileMode(0755))
 		},
 	}
 

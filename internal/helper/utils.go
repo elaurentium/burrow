@@ -156,7 +156,9 @@ func UpdateVersion(version string) (string, error) {
 		return "", fmt.Errorf("the version is empty. something went wrong with the release")
 	}
 
-	Version = version
+	release := fmt.Sprintf("burrow: %s", version)
 
-	return version, nil
+	Version = release
+
+	return release, nil
 }

@@ -30,10 +30,28 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/elaurentium/burrow/internal/helper"
 )
 
 type CreateFs interface {
 	Create(paths []string) error
+}
+
+func isFile(path string) bool {
+	if filepath.Ext(path) != "" {
+		return true
+	}
+
+	base := filepath.Base(path)
+	for _, file := range helper.FilesWithoutExtension {
+		if strings.EqualFold(base, file) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func Create(paths []string, perm os.FileMode) error {
@@ -53,7 +71,7 @@ func Create(paths []string, perm os.FileMode) error {
 			}
 		}
 
-		if filepath.Ext(path) != "" {
+		if isFile(path) {
 			if _, err := os.Create(path); err != nil {
 				fmt.Fprintf(os.Stderr, "Error creating file %s: %v\n", path, err)
 			}

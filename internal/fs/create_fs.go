@@ -42,7 +42,6 @@ func Create(paths []string, perm os.FileMode) error {
 			fmt.Fprintf(os.Stdout, "Path already exists: %s\n", path)
 			continue
 		}
-
 		parent := filepath.Dir(path)
 		if parent != "." && parent != "" {
 			if _, err := os.Stat(parent); os.IsNotExist(err) {

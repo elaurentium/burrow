@@ -27,8 +27,6 @@
 package burrow
 
 import (
-	"os"
-
 	create "github.com/elaurentium/burrow/internal/fs"
 	"github.com/elaurentium/burrow/internal/helper"
 	"github.com/elaurentium/burrow/internal/sync"
@@ -49,7 +47,7 @@ func burrow() *cobra.Command {
 			return nil
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
-			return create.Create(args, os.FileMode(0755))
+			return create.Create(args, 0755)
 		},
 	}
 

@@ -26,8 +26,68 @@
 
 package helper
 
-const (
-	Name = "Burrow"
-	Version = "0.0.1"
-	Usage = "Burrow"
+import (
+	"fmt"
+	"strconv"
+	"strings"
 )
+
+const (
+	Name      = "Burrow"
+	Usage     = "Burrow"
+	Owner     = "elaurentium"
+	GithubApi = "https://api.github.com/repos/" + Owner + "/" + Name
+)
+
+var (
+	Version = "1.0.0"
+)
+
+func IsVersionNewer(latest, current string) (bool, error) {
+	latestParts := strings.Split(latest, ".")
+	currentParts := strings.Split(current, ".")
+
+	// Pad shorter version with zeros
+	maxLen := len(latestParts)
+	if len(currentParts) > maxLen {
+		maxLen = len(currentParts)
+	}
+
+	for len(latestParts) < maxLen {
+		latestParts = append(latestParts, "0")
+	}
+	for len(currentParts) < maxLen {
+		currentParts = append(currentParts, "0")
+	}
+
+	// Compare each part
+	for i := 0; i < maxLen; i++ {
+		latestNum, err := strconv.Atoi(latestParts[i])
+		if err != nil {
+			return false, fmt.Errorf("invalid version format in latest: %s", latest)
+		}
+
+		currentNum, err := strconv.Atoi(currentParts[i])
+		if err != nil {
+			return false, fmt.Errorf("invalid version format in current: %s", current)
+		}
+
+		if latestNum > currentNum {
+			return true, nil
+		} else if latestNum < currentNum {
+			return false, nil
+		}
+	}
+
+	return false, nil // Versions are equal
+}
+
+func UpdateVersion(version string) (string, error) {
+	if version == "" {
+		return "" ,fmt.Errorf("The version is empty. Something went wrong with the release.")
+	}
+
+	Version = version
+
+	return version, nil
+}

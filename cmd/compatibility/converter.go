@@ -36,6 +36,8 @@ func Convert(args []string) []string {
 			arg = "--help"
 		case "-v", "--version":
 			arg = "--version"
+		case "--update":
+			arg = "--update"
 		}
 		command = append(command, arg)
 	}

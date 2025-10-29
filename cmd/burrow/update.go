@@ -29,39 +29,29 @@ package burrow
 import (
 	"os"
 
-	create "github.com/elaurentium/burrow/internal/fs"
-	"github.com/elaurentium/burrow/internal/helper"
 	"github.com/elaurentium/burrow/internal/sync"
 	"github.com/spf13/cobra"
 )
 
-func burrow() *cobra.Command {
+func runUpdate() *cobra.Command {
 	var updateFlag bool
 	rootCmd := &cobra.Command{
-		Version: helper.Version,
-		Use:     helper.Usage,
-		Short:   "Directory/File Creation CLI Tool",
-		Args:    cobra.ArbitraryArgs,
-		PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
+		Use:   "update",
+		Short: "Directory/File Update CLI Tool",
+		Long:  "Update directories and files quickly. Paths with extensions are treated as files; others as directories.",
+		PreRunE: func(_ *cobra.Command, args []string) error {
 			if updateFlag {
-				return sync.CheckAndPromptUpdate()
+				if err := sync.CheckAndPromptUpdate(); err != nil {
+					return err
+				}
+				os.Exit(0)
 			}
 			return nil
-		},
-		RunE: func(_ *cobra.Command, args []string) error {
-			return create.Create(args, os.FileMode(0755))
 		},
 	}
 
 	flags := rootCmd.Flags()
 	flags.BoolVar(&updateFlag, "update", false, "Check for and perform application updates")
 
-	rootCmd.AddCommand(runCreate())
-	rootCmd.AddCommand(runUpdate())
-
 	return rootCmd
-}
-
-func Execute() error {
-	return burrow().Execute()
 }

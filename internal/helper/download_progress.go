@@ -24,44 +24,35 @@
 
 */
 
-package burrow
+package helper
 
 import (
+	"fmt"
+	"io"
 	"os"
-
-	create "github.com/elaurentium/burrow/internal/fs"
-	"github.com/elaurentium/burrow/internal/helper"
-	"github.com/elaurentium/burrow/internal/sync"
-	"github.com/spf13/cobra"
 )
 
-func burrow() *cobra.Command {
-	var updateFlag bool
-	rootCmd := &cobra.Command{
-		Version: helper.Version,
-		Use:     helper.Usage,
-		Short:   "Directory/File Creation CLI Tool",
-		Args:    cobra.ArbitraryArgs,
-		PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
-			if updateFlag {
-				return sync.CheckAndPromptUpdate()
-			}
-			return nil
-		},
-		RunE: func(_ *cobra.Command, args []string) error {
-			return create.Create(args, os.FileMode(0755))
-		},
-	}
-
-	flags := rootCmd.Flags()
-	flags.BoolVar(&updateFlag, "update", false, "Check for and perform application updates")
-
-	rootCmd.AddCommand(runCreate())
-	rootCmd.AddCommand(runUpdate())
-
-	return rootCmd
+type DownloadProgress struct {
+	io.Reader
+	Total    int8
+	Length   int8
+	Progress float32
 }
 
-func Execute() error {
-	return burrow().Execute()
+func (dp *DownloadProgress) Read(p []byte) (int, error) {
+	n, err := dp.Reader.Read(p)
+	if n > 0 {
+		dp.Total += int8(n)
+		percentage := float32(dp.Total) / float32(dp.Length) * float32(100)
+		if percentage-dp.Progress > 2 {
+			dp.Progress = percentage
+			fmt.Fprintf(os.Stderr, "\r%.2f%%", dp.Progress)
+			if dp.Progress > 98.0 {
+				dp.Progress = 100
+				fmt.Fprintf(os.Stderr, "\r%.2f%%\n", dp.Progress)
+			}
+		}
+	}
+
+	return n, err
 }

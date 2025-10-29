@@ -27,59 +27,42 @@
 package fs
 
 import (
+	"fmt"
 	"os"
-	"time"
+	"path/filepath"
 )
-
-type Stat_t struct {
-	Dev     uint64
-	Ino     uint64
-	Mode    uint32 // include type + permissions (bits S_IF* + 0777)
-	Nlink   uint64
-	Uid     uint32
-	Gid     uint32
-	Rdev    uint64
-	Size    int64
-	Blksize int64
-	Blocks  int64
-	Atime   time.Time
-	Mtime   time.Time
-	Ctime   time.Time
-	Path    string
-}
 
 type CreateFs interface {
 	Create(paths []string) error
 }
 
-func GetFileStat(path string) (Stat_t, error) {
-	info, err := os.Lstat(path)
-	if  err != nil {
-		return Stat_t{Path: path}, err
-	}
-	return Stat_t{
-		Dev:     0,
-		Ino:     0,
-		Mode:    uint32(info.Mode()),
-		Nlink:   0,
-		Uid:     0,
-		Gid:     0,
-		Rdev:    0,
-		Size:    info.Size(),
-		Blksize: 0,
-		Blocks:  0,
-		Atime:   info.ModTime(),
-		Mtime:   info.ModTime(),
-		Ctime:   info.ModTime(),
-		Path:    path,
-	}, nil
-}
-
 func Create(paths []string, perm os.FileMode) error {
 	for _, path := range paths {
-		if err := os.MkdirAll(path, perm); err != nil {
-			return err
+		if _, err := os.Stat(path); err == nil {
+			fmt.Fprintf(os.Stdout, "Path already exists: %s\n", path)
+			continue
+		}
+
+		parent := filepath.Dir(path)
+		if parent != "." && parent != "" {
+			if _, err := os.Stat(parent); os.IsNotExist(err) {
+				if err := os.MkdirAll(parent, perm); err != nil {
+					fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", parent, err)
+					continue
+				}
+			}
+		}
+
+		if filepath.Ext(path) != "" {
+			if _, err := os.Create(path); err != nil {
+				fmt.Fprintf(os.Stderr, "Error creating file %s: %v\n", path, err)
+			}
+		} else {
+			if err := os.MkdirAll(path, perm); err != nil {
+				fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", path, err)
+			}
 		}
 	}
+
 	return nil
 }

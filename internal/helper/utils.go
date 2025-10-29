@@ -37,10 +37,79 @@ const (
 	Usage     = "Burrow"
 	Owner     = "elaurentium"
 	GithubApi = "https://api.github.com/repos/" + Owner + "/" + Name
+
+	// Build tools
+	Makefile   = "Makefile"
+	CMakeLists = "CMakeLists"
+	Rakefile   = "Rakefile"
+	Jakefile   = "Jakefile"
+	Gruntfile  = "Gruntfile"
+	Gulpfile   = "Gulpfile"
+
+	// Container/VM
+	Dockerfile    = "Dockerfile"
+	Containerfile = "Containerfile"
+	Vagrantfile   = "Vagrantfile"
+
+	// CI/CD
+	Jenkinsfile = "Jenkinsfile"
+	Procfile    = "Procfile"
+	Buildfile   = "Buildfile"
+
+	// Package managers
+	Gemfile  = "Gemfile"
+	Podfile  = "Podfile"
+	Cartfile = "Cartfile"
+	Brewfile = "Brewfile"
+
+	// Documentation
+	README       = "README"
+	LICENSE      = "LICENSE"
+	CHANGELOG    = "CHANGELOG"
+	CONTRIBUTING = "CONTRIBUTING"
+	AUTHORS      = "AUTHORS"
+	CONTRIBUTORS = "CONTRIBUTORS"
+	COPYING      = "COPYING"
+	INSTALL      = "INSTALL"
+	NEWS         = "NEWS"
+	TODO         = "TODO"
+	HISTORY      = "HISTORY"
+	NOTICE       = "NOTICE"
+
+	// Config files
+	Cakefile  = "Cakefile"
+	Capfile   = "Capfile"
+	Guardfile = "Guardfile"
+
+	// Version control
+	CODEOWNERS = "CODEOWNERS"
 )
 
 var (
-	Version = "1.0.0"
+	Version               = "1.0.0"
+	FilesWithoutExtension = []string{
+		// Build tools
+		Makefile, CMakeLists, Rakefile, Jakefile, Gruntfile, Gulpfile,
+
+		// Container/VM
+		Dockerfile, Containerfile, Vagrantfile,
+
+		// CI/CD
+		Jenkinsfile, Procfile, Buildfile,
+
+		// Package managers
+		Gemfile, Podfile, Cartfile, Brewfile,
+
+		// Documentation
+		README, LICENSE, CHANGELOG, CONTRIBUTING, AUTHORS, CONTRIBUTORS,
+		COPYING, INSTALL, NEWS, TODO, HISTORY, NOTICE,
+
+		// Config files
+		Cakefile, Capfile, Guardfile,
+
+		// Version control
+		CODEOWNERS,
+	}
 )
 
 func IsVersionNewer(latest, current string) (bool, error) {
@@ -84,7 +153,7 @@ func IsVersionNewer(latest, current string) (bool, error) {
 
 func UpdateVersion(version string) (string, error) {
 	if version == "" {
-		return "" ,fmt.Errorf("The version is empty. Something went wrong with the release.")
+		return "", fmt.Errorf("the version is empty. something went wrong with the release")
 	}
 
 	Version = version

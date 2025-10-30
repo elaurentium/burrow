@@ -27,31 +27,40 @@
 package burrow
 
 import (
-	"os"
+	"fmt"
 
 	"github.com/elaurentium/burrow/internal/sync"
 	"github.com/spf13/cobra"
 )
 
-func runUpdate() *cobra.Command {
-	var updateFlag bool
+func updateCommand() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "update",
 		Short: "Directory/File Update CLI Tool",
-		Long:  "Update directories and files quickly. Paths with extensions are treated as files; others as directories.",
-		PreRunE: func(_ *cobra.Command, args []string) error {
-			if updateFlag {
-				if err := sync.CheckAndPromptUpdate(); err != nil {
-					return err
-				}
-				os.Exit(0)
-			}
-			return nil
+		Long:  "Update the application to the latest version.",
+		Args:  cobra.NoArgs,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return runUpdate()
 		},
 	}
 
-	flags := rootCmd.Flags()
-	flags.BoolVar(&updateFlag, "update", false, "Check for and perform application updates")
-
 	return rootCmd
+}
+
+func runUpdate() error {
+	_, hasUpdate, err := sync.CheckForUpdates()
+	if err != nil {
+		return fmt.Errorf("failed to check for updates: %w", err)
+	}
+
+	if !hasUpdate {
+		fmt.Println("You are running the latest version!")
+		return nil
+	}
+
+	if err := sync.CheckAndPromptUpdate(); err != nil {
+		return err
+	}
+
+	return nil
 }

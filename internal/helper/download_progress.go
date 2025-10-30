@@ -30,29 +30,47 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 type DownloadProgress struct {
 	io.Reader
-	Total    int8
-	Length   int8
+	Total    int64
+	Length   int64
 	Progress float32
 }
 
 func (dp *DownloadProgress) Read(p []byte) (int, error) {
 	n, err := dp.Reader.Read(p)
 	if n > 0 {
-		dp.Total += int8(n)
-		percentage := float32(dp.Total) / float32(dp.Length) * float32(100)
-		if percentage-dp.Progress > 2 {
-			dp.Progress = percentage
-			fmt.Fprintf(os.Stderr, "\r%.2f%%", dp.Progress)
-			if dp.Progress > 98.0 {
-				dp.Progress = 100
-				fmt.Fprintf(os.Stderr, "\r%.2f%%\n", dp.Progress)
-			}
+		dp.Total += int64(n)
+		percentage := float64(dp.Total) / float64(dp.Length) * 100.0
+
+		if percentage >= 1.0 || dp.Total >= dp.Length {
+			dp.Progress = float32(percentage)
+			dp.printProgress(percentage)
 		}
 	}
 
 	return n, err
+}
+
+func (dp *DownloadProgress) printProgress(percentage float64) {
+	if percentage > 100 {
+		percentage = 100
+	}
+
+	barWidth := 40
+	filled := int(percentage / 100.0 * float64(barWidth))
+	bar := strings.Repeat("█", filled) + strings.Repeat("░", barWidth-filled)
+
+	mb := float64(dp.Total) / 1024.0 / 1024.0
+	totalMB := float64(dp.Length) / 1024.0 / 1024.0
+
+	fmt.Fprintf(os.Stderr, "\r[%s] %.1f%% (%.2f/%.2f MB)",
+		bar, percentage, mb, totalMB)
+
+	if percentage >= 100 {
+		fmt.Fprintln(os.Stderr)
+	}
 }

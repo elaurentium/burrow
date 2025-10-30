@@ -68,6 +68,7 @@ func CheckForUpdates() (*GithubRelease, bool, error) {
 	}
 
 	var release GithubRelease
+
 	decoder := json.NewDecoder(resp.Body)
 	if err := decoder.Decode(&release); err != nil {
 		return nil, false, fmt.Errorf("error checking for updates: %v", err)
@@ -154,7 +155,7 @@ func PerformUpdate(release *GithubRelease) error {
 func PromptForUpdate(release *GithubRelease) (bool, error) {
 	fmt.Printf("Update Available\n"+
 		"A new version of %s is available!\n\n"+
-		"Current version: %s\n"+
+		"Current version: v%s\n"+
 		"Latest version: %s\n\n"+
 		"Release notes:\n%s\n\n",
 		helper.Name, helper.Version, release.TagName, release.Body)
@@ -361,7 +362,7 @@ func downloadAsset(url, filename string) (string, error) {
 
 // downloadAssetWithTestFlag downloads an asset with optional test mode support
 func downloadAssetWithTestFlag(url, filename string, allowTestMode bool) (string, error) {
-	var length int8
+	var length int64
 	// Validate URL before making request
 	if err := validateGitHubURLWithTestFlag(url, allowTestMode); err != nil {
 		return "", fmt.Errorf("URL validation failed: %w", err)
@@ -406,7 +407,7 @@ func downloadAssetWithTestFlag(url, filename string, allowTestMode bool) (string
 			Reader: reader,
 			Length: length,
 		}
-		fmt.Fprintln(os.Stderr, "Downloading...")
+		fmt.Fprintf(os.Stderr, "Downloading %s...\n", filename)
 	}
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
@@ -468,7 +469,7 @@ func copyFile(src, dst string) error {
 		fmt.Fprintln(os.Stderr, "Copying...")
 		reader = &helper.DownloadProgress{
 			Reader: reader,
-			Length: int8(size),
+			Length: int64(size),
 		}
 	}
 

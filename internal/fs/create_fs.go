@@ -30,37 +30,79 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
-type CreateFs interface {
-	Create(paths []string) error
+type Creator struct {
+	Perm os.FileMode
+	wg   *sync.WaitGroup
 }
 
-func Create(paths []string, perm os.FileMode) error {
-	for _, path := range paths {
-		if _, err := os.Stat(path); err == nil {
-			fmt.Fprintf(os.Stdout, "Path already exists: %s\n", path)
-			continue
-		}
+// Multi path with paralelism
+func (c *Creator) Create(paths []string) []error {
+	jobs := make(chan string, len(paths))
+	errors := make(chan error, len(paths))
 
-		parent := filepath.Dir(path)
-		if parent != "." && parent != "" {
-			if _, err := os.Stat(parent); os.IsNotExist(err) {
-				if err := os.MkdirAll(parent, perm); err != nil {
-					fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", parent, err)
-					continue
+	// Init workers
+	for i := 0; i < len(paths); i++ {
+		c.wg.Add(1)
+		go func() {
+			for path := range jobs {
+				if err := c.create_fs(path); err != nil {
+					errors <- fmt.Errorf("Failed to create %s: %w", path, err)
 				}
 			}
-		}
+		}()
+	}
 
-		if filepath.Ext(path) != "" {
-			if _, err := os.Create(path); err != nil {
-				fmt.Fprintf(os.Stderr, "Error creating file %s: %v\n", path, err)
+	// Send jobs
+	for _, path := range paths {
+		jobs <- path
+	}
+	close(jobs)
+
+	// Wait for workers to finish
+	c.wg.Wait()
+	close(errors)
+
+	//Colect errors
+	var errs []error
+	for err := range errors {
+		errs = append(errs, err)
+	}
+
+	return errs
+}
+
+// Handle creation fs
+func (c *Creator) create_fs(path string) error {
+	// Verify path if already exists
+	if _, err := os.Stat(path); err == nil {
+		fmt.Fprintf(os.Stdout, "Path already exists: %s\n", path)
+		return nil
+	}
+
+	parent := filepath.Dir(path)
+	if parent != "." && parent == "" {
+		// Verify parent dir exists
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			// Create parent dir if not exists
+			if err := os.MkdirAll(parent, c.Perm); err != nil {
+				return fmt.Errorf("Error creating directory %s: %w", parent, err)
 			}
-		} else {
-			if err := os.MkdirAll(path, perm); err != nil {
-				fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", path, err)
-			}
+		}
+	}
+
+	// Create file or dir
+	if filepath.Ext(path) != "" {
+		file, err := os.Create(path)
+		if err != nil {
+			return fmt.Errorf("Error creating file %s: %w", path, err)
+		}
+		file.Close()
+	} else {
+		if err := os.MkdirAll(path, c.Perm); err != nil {
+			return fmt.Errorf("Error creating directory %s: %w", path, err)
 		}
 	}
 

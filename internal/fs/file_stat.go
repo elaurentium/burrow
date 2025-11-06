@@ -28,6 +28,9 @@ package fs
 
 import (
 	"fmt"
+	"os/user"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -56,12 +59,52 @@ type Stat struct {
 	Gid     uint32    // group ID
 	Rdev    uint64    // device ID (for special file)
 	Size    int64     // file size in bytes
-	Blksize int32     //preferrd block size for file system io
+	Blksize int64     //preferrd block size for file system io
 	Blocks  int64     // number of blocks allocated
 	Atime   time.Time // last access time
 	Mtime   time.Time // last modification time
 	Ctime   time.Time // last status change time
 	Path    string    // file path
+}
+
+// FormatPermissions converts a file mode to a string like "drwxr-xr-x"
+func formatPermissions(mode uint32) string {
+	var buf strings.Builder
+
+	// File type
+	switch mode & S_IFMT {
+	case S_IFDIR:
+		buf.WriteByte('d')
+	case S_IFREG:
+		buf.WriteByte('-')
+	case S_IFLNK:
+		buf.WriteByte('l')
+	case S_IFIFO:
+		buf.WriteByte('p')
+	case S_IFSOCK:
+		buf.WriteByte('s')
+	case S_IFCHR:
+		buf.WriteByte('c')
+	case S_IFBLK:
+		buf.WriteByte('b')
+	default:
+		buf.WriteByte('?')
+	}
+
+	// Permissions: rwx for user, group, other
+	perms := []string{"r", "w", "x"}
+	for i := 0; i < 3; i++ {
+		// user, group, other
+		for j := 0; j < 3; j++ {
+			if mode&(1<<(8-3*i-j)) != 0 {
+				buf.WriteString(perms[j])
+			} else {
+				buf.WriteByte('-')
+			}
+		}
+	}
+
+	return buf.String()
 }
 
 // FileStat return all information about file
@@ -82,25 +125,47 @@ func FileStat(path string) (Stat, error) {
 		Size:    st.Size,
 		Blksize: st.Blksize,
 		Blocks:  st.Blocks,
-		Atime:   time.Unix(int64(st.Atimespec.Sec), int64(st.Atimespec.Nsec)),
-		Mtime:   time.Unix(int64(st.Mtimespec.Sec), int64(st.Mtimespec.Nsec)),
-		Ctime:   time.Unix(int64(st.Ctimespec.Sec), int64(st.Ctimespec.Nsec)),
+		Atime:   time.Unix(int64(st.Atim.Sec), int64(st.Atim.Nsec)),
+		Mtime:   time.Unix(int64(st.Mtim.Sec), int64(st.Mtim.Nsec)),
+		Ctime:   time.Unix(int64(st.Ctim.Sec), int64(st.Ctim.Nsec)),
 		Path:    path,
 	}, nil
 }
 
-func StatInfo(path string) error {
-	st, err := FileStat(path)
-	if err != nil {
-		return err
-	}
+func StatInfo(paths []string) error {
+	for _, path := range paths {
+		st, err := FileStat(path)
+		if err != nil {
+			return err
+		}
 
-	fmt.Printf("File: %s\n", st.Path)
-	fmt.Printf("Size: %d\n", st.Size)
-	fmt.Printf("Permissions: %o\n", st.Mode)
-	fmt.Printf("Last modified: %s\n", st.Mtime)
-	fmt.Printf("Last access: %s\n", st.Atime)
-	fmt.Printf("Created: %s\n", st.Ctime)
+		// Get username
+		u, err := user.LookupId(strconv.Itoa(int(st.Uid)))
+		username := strconv.Itoa(int(st.Uid))
+		if err == nil {
+			username = u.Username
+		}
+
+		// Get group name
+		g, err := user.LookupGroupId(strconv.Itoa(int(st.Gid)))
+		groupname := strconv.Itoa(int(st.Gid))
+		if err == nil {
+			groupname = g.Name
+		}
+
+		// Format time
+		mtime := st.Mtime
+		now := time.Now()
+		sixMonthsAgo := now.AddDate(0, -6, 0)
+		timeStr := mtime.Format("Jan _2  2006")
+		if mtime.After(sixMonthsAgo) {
+			timeStr = mtime.Format("Jan _2 15:04")
+		}
+
+		fmt.Printf("%s %d %s %s %d %s %s\n",
+			formatPermissions(st.Mode), st.Nlink, username, groupname, st.Size, timeStr, st.Path,
+		)
+	}
 
 	return nil
 }

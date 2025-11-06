@@ -33,15 +33,13 @@ import (
 
 func runFileStat() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:   "stat",
+		Use:   "stat [OPTIONS] [FILE...]",
 		Short: "File Stat CLI Tool",
 		Long:  "File Stat CLI Tool. Gets information about a file.",
 		RunE: func(_ *cobra.Command, args []string) error {
-			return create.StatInfo(args[0])
+			return create.StatInfo(args)
 		},
 	}
-
-	//flags := rootCmd.Flags()
 
 	return rootCmd
 }

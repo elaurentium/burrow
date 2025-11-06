@@ -56,7 +56,7 @@ type Stat struct {
 	Gid     uint32    // group ID
 	Rdev    uint64    // device ID (for special file)
 	Size    int64     // file size in bytes
-	Blksize int64     //preferrd block size for file system io
+	Blksize int64     // preferrd block size for file system io
 	Blocks  int64     // number of blocks allocated
 	Atime   time.Time // last access time
 	Mtime   time.Time // last modification time
@@ -95,12 +95,10 @@ func StatInfo(path string) error {
 		return err
 	}
 
-	fmt.Printf("File: %s\n", st.Path)
-	fmt.Printf("Size: %d\n", st.Size)
-	fmt.Printf("Permissions: %o\n", st.Mode)
-	fmt.Printf("Last modified: %s\n", st.Mtime)
-	fmt.Printf("Last access: %s\n", st.Atime)
-	fmt.Printf("Created: %s\n", st.Ctime)
+	fmt.Printf("total: %s\n"+
+		"%o"+" %s"+" %s"+" %s"+" %s"+" %s"+" %s"+" %s"+" %s\n",
+		st.Path, st.Mode, st.Uid, st.Gid, st.Size, st.Atime, st.Mtime, st.Ctime, st.Path,
+	)
 
 	return nil
 }

@@ -33,6 +33,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type ProjectOptions struct {
+	All bool
+}
+
 func burrow() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Version: helper.Version,

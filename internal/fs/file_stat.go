@@ -132,38 +132,40 @@ func FileStat(path string) (Stat, error) {
 	}, nil
 }
 
-func StatInfo(path string) error {
-	st, err := FileStat(path)
-	if err != nil {
-		return err
-	}
+func StatInfo(paths []string) error {
+	for _, path := range paths {
+		st, err := FileStat(path)
+		if err != nil {
+			return err
+		}
 
-	// Get username
-	u, err := user.LookupId(strconv.Itoa(int(st.Uid)))
-	username := strconv.Itoa(int(st.Uid))
-	if err == nil {
-		username = u.Username
-	}
+		// Get username
+		u, err := user.LookupId(strconv.Itoa(int(st.Uid)))
+		username := strconv.Itoa(int(st.Uid))
+		if err == nil {
+			username = u.Username
+		}
 
-	// Get group name
-	g, err := user.LookupGroupId(strconv.Itoa(int(st.Gid)))
-	groupname := strconv.Itoa(int(st.Gid))
-	if err == nil {
-		groupname = g.Name
-	}
+		// Get group name
+		g, err := user.LookupGroupId(strconv.Itoa(int(st.Gid)))
+		groupname := strconv.Itoa(int(st.Gid))
+		if err == nil {
+			groupname = g.Name
+		}
 
-	// Format time
-	mtime := st.Mtime
-	now := time.Now()
-	sixMonthsAgo := now.AddDate(0, -6, 0)
-	timeStr := mtime.Format("Jan _2  2006")
-	if mtime.After(sixMonthsAgo) {
-		timeStr = mtime.Format("Jan _2 15:04")
-	}
+		// Format time
+		mtime := st.Mtime
+		now := time.Now()
+		sixMonthsAgo := now.AddDate(0, -6, 0)
+		timeStr := mtime.Format("Jan _2  2006")
+		if mtime.After(sixMonthsAgo) {
+			timeStr = mtime.Format("Jan _2 15:04")
+		}
 
-	fmt.Printf("%s %d %s %s %d %s %s\n",
-		formatPermissions(st.Mode), st.Nlink, username, groupname, st.Size, timeStr, st.Path,
-	)
+		fmt.Printf("%s %d %s %s %d %s %s\n",
+			formatPermissions(st.Mode), st.Nlink, username, groupname, st.Size, timeStr, st.Path,
+		)
+	}
 
 	return nil
 }

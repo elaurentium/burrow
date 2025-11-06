@@ -30,8 +30,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
+	"strings"
 	"sync"
+
+	"github.com/elaurentium/burrow/internal/helper"
 )
 
 type Creator struct {
@@ -42,78 +44,49 @@ type Creator struct {
 
 func NewCreator() *Creator {
 	return &Creator{
-		Perm: 0755,
+		Perm:    0755,
 		Workers: 0,
-		Wg:   &sync.WaitGroup{},
+		Wg:      &sync.WaitGroup{},
 	}
 }
 
-// Multi path with paralelism
-func (c *Creator) Create(paths []string) {
-	jobs := make(chan string, len(paths))
-
-	max := c.Workers
-	if max <= 0 {
-		max = runtime.NumCPU() * 2
+func isFile(path string) bool {
+	if filepath.Ext(path) != "" {
+		return true
 	}
-
-	if max > len(paths) {
-		max = len(paths)
+	base := filepath.Base(path)
+	for _, file := range helper.FilesWithoutExtension {
+		if strings.EqualFold(base, file) {
+			return true
+		}
 	}
+	return false
+}
 
-	// Init workers
-	for i := 0; i < max; i++ {
-		c.Wg.Add(1)
-		go func() {
-			for path := range jobs {
-				if err := c.create_fs(path); err != nil {
-					fmt.Errorf("Failed to create %s: %w", path, err)
+func (c *Creator) Create(paths []string) error {
+	for _, path := range paths {
+		if _, err := os.Stat(path); err == nil {
+			fmt.Fprintf(os.Stdout, "Path already exists: %s\n", path)
+			continue
+		}
+		parent := filepath.Dir(path)
+		if parent != "." && parent != "" {
+			if _, err := os.Stat(parent); os.IsNotExist(err) {
+				if err := os.MkdirAll(parent, c.Perm); err != nil {
+					fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", parent, err)
+					continue
 				}
 			}
-		}()
-	}
-
-	// Send jobs
-	for _, path := range paths {
-		jobs <- path
-	}
-	close(jobs)
-
-	// Wait for workers to finish
-	c.Wg.Wait()
-}
-
-// Handle creation fs
-func (c *Creator) create_fs(path string) error {
-	// Verify path if already exists
-	if _, err := os.Stat(path); err == nil {
-		fmt.Fprintf(os.Stdout, "Path already exists: %s\n", path)
-		return nil
-	}
-
-	parent := filepath.Dir(path)
-	if parent != "." && parent == "" {
-		// Verify parent dir exists
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			// Create parent dir if not exists
-			if err := os.MkdirAll(parent, c.Perm); err != nil {
-				return fmt.Errorf("Error creating directory %s: %w", parent, err)
+		}
+		if isFile(path) {
+			if _, err := os.Create(path); err != nil {
+				fmt.Fprintf(os.Stderr, "Error creating file %s: %v\n", path, err)
+			}
+		} else {
+			if err := os.MkdirAll(path, c.Perm); err != nil {
+				fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", path, err)
 			}
 		}
 	}
-
-	// Create file or dir
-	if filepath.Ext(path) != "" {
-		file, err := os.Create(path)
-		if err != nil {
-			return fmt.Errorf("Error creating file %s: %w", path, err)
-		}
-		file.Close()
-	} else {
-		if err := os.MkdirAll(path, c.Perm); err != nil {
-			return fmt.Errorf("Error creating directory %s: %w", path, err)
-		}
-	}
-
 	return nil
 }

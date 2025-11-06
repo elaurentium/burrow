@@ -36,7 +36,7 @@ import (
 
 type Creator struct {
 	Perm    os.FileMode
-	Workers int
+	Workers int // 0 = auto (NumCpu() * 2)
 	Wg      *sync.WaitGroup
 }
 
@@ -65,6 +65,7 @@ func (c *Creator) Create(paths []string) {
 	for i := 0; i < max; i++ {
 		c.Wg.Add(1)
 		go func() {
+			defer c.Wg.Done()
 			for path := range jobs {
 				if err := c.create_fs(path); err != nil {
 					fmt.Errorf("Failed to create %s: %w", path, err)

@@ -27,19 +27,49 @@
 package burrow
 
 import (
+	"fmt"
+	"os"
+
 	create "github.com/elaurentium/burrow/internal/fs"
 	"github.com/spf13/cobra"
 )
 
-func runFileStat() *cobra.Command {
-	rootCmd := &cobra.Command{
+type fileStatOptions struct {
+	*ProjectOptions
+	All bool // show all files
+}
+
+func (f *fileStatOptions) buildFileStat() *cobra.Command {
+	opts := &fileStatOptions{
+		ProjectOptions: &ProjectOptions{},
+		All:            f.All,
+	}
+	cmd := &cobra.Command{
 		Use:   "stat [OPTIONS] [FILE...]",
 		Short: "File Stat CLI Tool",
 		Long:  "File Stat CLI Tool. Gets information about a file.",
 		RunE: func(_ *cobra.Command, args []string) error {
+			if opts.All {
+				entries, err := os.ReadDir(".")
+				if err != nil {
+					fmt.Errorf("error to read dir: %s", err)
+				}
+				var paths []string
+				for _, entry := range entries {
+					paths = append(paths, entry.Name())
+				}
+				return create.StatInfo(paths)
+			}
 			return create.StatInfo(args)
 		},
 	}
 
-	return rootCmd
+	flags := cmd.Flags()
+	flags.BoolVar(&opts.All, "all", false, "show all files")
+
+	return cmd
+}
+
+func runFileStat() *cobra.Command {
+	return (&fileStatOptions{}).buildFileStat()
 }

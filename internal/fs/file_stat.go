@@ -31,8 +31,9 @@ import (
 	"os/user"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
+
+	"golang.org/x/sys/unix"
 )
 
 // POSIX mask file types(compatibility with Mode)
@@ -59,7 +60,7 @@ type Stat struct {
 	Gid     uint32    // group ID
 	Rdev    uint64    // device ID (for special file)
 	Size    int64     // file size in bytes
-	Blksize int64     //preferrd block size for file system io
+	Blksize int32     //preferrd block size for file system io
 	Blocks  int64     // number of blocks allocated
 	Atime   time.Time // last access time
 	Mtime   time.Time // last modification time
@@ -109,8 +110,8 @@ func formatPermissions(mode uint32) string {
 
 // FileStat return all information about file
 func FileStat(path string) (Stat, error) {
-	var st syscall.Stat_t
-	if err := syscall.Lstat(path, &st); err != nil {
+	var st unix.Stat_t
+	if err := unix.Lstat(path, &st); err != nil {
 		return Stat{Path: path}, err
 	}
 

@@ -27,21 +27,21 @@
 package burrow
 
 import (
-	"os"
-
 	create "github.com/elaurentium/burrow/internal/fs"
 	"github.com/spf13/cobra"
 )
 
-func runCreate() *cobra.Command {
+func runFileStat() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Short: "Directory/File Creation CLI Tool",
-		Long:  "Create directories and files quickly. Paths with extensions are treated as files; others as directories.",
-		Args:  cobra.ArbitraryArgs,
+		Use:   "stat",
+		Short: "File Stat CLI Tool",
+		Long:  "File Stat CLI Tool. Gets information about a file.",
 		RunE: func(_ *cobra.Command, args []string) error {
-			return create.Create(args, os.FileMode(0755))
+			return create.StatInfo(args[0])
 		},
 	}
+
+	//flags := rootCmd.Flags()
 
 	return rootCmd
 }

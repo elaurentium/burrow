@@ -30,26 +30,44 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 )
 
 type Creator struct {
-	Perm os.FileMode
-	wg   *sync.WaitGroup
+	Perm    os.FileMode
+	Workers int
+	Wg      *sync.WaitGroup
+}
+
+func NewCreator() *Creator {
+	return &Creator{
+		Perm: 0755,
+		Workers: 0,
+		Wg:   &sync.WaitGroup{},
+	}
 }
 
 // Multi path with paralelism
-func (c *Creator) Create(paths []string) []error {
+func (c *Creator) Create(paths []string) {
 	jobs := make(chan string, len(paths))
-	errors := make(chan error, len(paths))
+
+	max := c.Workers
+	if max <= 0 {
+		max = runtime.NumCPU() * 2
+	}
+
+	if max > len(paths) {
+		max = len(paths)
+	}
 
 	// Init workers
-	for i := 0; i < len(paths); i++ {
-		c.wg.Add(1)
+	for i := 0; i < max; i++ {
+		c.Wg.Add(1)
 		go func() {
 			for path := range jobs {
 				if err := c.create_fs(path); err != nil {
-					errors <- fmt.Errorf("Failed to create %s: %w", path, err)
+					fmt.Errorf("Failed to create %s: %w", path, err)
 				}
 			}
 		}()
@@ -62,16 +80,7 @@ func (c *Creator) Create(paths []string) []error {
 	close(jobs)
 
 	// Wait for workers to finish
-	c.wg.Wait()
-	close(errors)
-
-	//Colect errors
-	var errs []error
-	for err := range errors {
-		errs = append(errs, err)
-	}
-
-	return errs
+	c.Wg.Wait()
 }
 
 // Handle creation fs

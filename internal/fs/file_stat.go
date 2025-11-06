@@ -28,6 +28,9 @@ package fs
 
 import (
 	"fmt"
+	"os/user"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -51,17 +54,57 @@ type Stat struct {
 	Dev     uint64    // device ID
 	Ino     uint64    // inode number
 	Mode    uint32    // include type + permissions (bits S_IF* + 0777)
-	Nlink   uint64    // number of hard links
+	Nlink   uint16    // number of hard links
 	Uid     uint32    // user ID
 	Gid     uint32    // group ID
 	Rdev    uint64    // device ID (for special file)
 	Size    int64     // file size in bytes
-	Blksize int64     // preferrd block size for file system io
+	Blksize int64     //preferrd block size for file system io
 	Blocks  int64     // number of blocks allocated
 	Atime   time.Time // last access time
 	Mtime   time.Time // last modification time
 	Ctime   time.Time // last status change time
 	Path    string    // file path
+}
+
+// FormatPermissions converts a file mode to a string like "drwxr-xr-x"
+func formatPermissions(mode uint32) string {
+	var buf strings.Builder
+
+	// File type
+	switch mode & S_IFMT {
+	case S_IFDIR:
+		buf.WriteByte('d')
+	case S_IFREG:
+		buf.WriteByte('-')
+	case S_IFLNK:
+		buf.WriteByte('l')
+	case S_IFIFO:
+		buf.WriteByte('p')
+	case S_IFSOCK:
+		buf.WriteByte('s')
+	case S_IFCHR:
+		buf.WriteByte('c')
+	case S_IFBLK:
+		buf.WriteByte('b')
+	default:
+		buf.WriteByte('?')
+	}
+
+	// Permissions: rwx for user, group, other
+	perms := []string{"r", "w", "x"}
+	for i := 0; i < 3; i++ {
+		// user, group, other
+		for j := 0; j < 3; j++ {
+			if mode&(1<<(8-3*i-j)) != 0 {
+				buf.WriteString(perms[j])
+			} else {
+				buf.WriteByte('-')
+			}
+		}
+	}
+
+	return buf.String()
 }
 
 // FileStat return all information about file
@@ -72,13 +115,13 @@ func FileStat(path string) (Stat, error) {
 	}
 
 	return Stat{
-		Dev:     st.Dev,
+		Dev:     uint64(st.Dev),
 		Ino:     st.Ino,
-		Mode:    st.Mode,
-		Nlink:   st.Nlink,
+		Mode:    uint32(st.Mode),
+		Nlink:   uint16(st.Nlink),
 		Uid:     st.Uid,
 		Gid:     st.Gid,
-		Rdev:    st.Rdev,
+		Rdev:    uint64(st.Rdev),
 		Size:    st.Size,
 		Blksize: st.Blksize,
 		Blocks:  st.Blocks,
@@ -95,9 +138,31 @@ func StatInfo(path string) error {
 		return err
 	}
 
-	fmt.Printf("total: %s\n"+
-		"%o"+" %s"+" %s"+" %s"+" %s"+" %s"+" %s"+" %s"+" %s\n",
-		st.Path, st.Mode, st.Uid, st.Gid, st.Size, st.Atime, st.Mtime, st.Ctime, st.Path,
+	// Get username
+	u, err := user.LookupId(strconv.Itoa(int(st.Uid)))
+	username := strconv.Itoa(int(st.Uid))
+	if err == nil {
+		username = u.Username
+	}
+
+	// Get group name
+	g, err := user.LookupGroupId(strconv.Itoa(int(st.Gid)))
+	groupname := strconv.Itoa(int(st.Gid))
+	if err == nil {
+		groupname = g.Name
+	}
+
+	// Format time
+	mtime := st.Mtime
+	now := time.Now()
+	sixMonthsAgo := now.AddDate(0, -6, 0)
+	timeStr := mtime.Format("Jan _2  2006")
+	if mtime.After(sixMonthsAgo) {
+		timeStr = mtime.Format("Jan _2 15:04")
+	}
+
+	fmt.Printf("%s %d %s %s %d %s %s\n",
+		formatPermissions(st.Mode), st.Nlink, username, groupname, st.Size, timeStr, st.Path,
 	)
 
 	return nil

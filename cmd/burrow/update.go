@@ -34,7 +34,7 @@ import (
 )
 
 func updateCommand() *cobra.Command {
-	rootCmd := &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Directory/File Update CLI Tool",
 		Long:  "Update the application to the latest version.",
@@ -44,7 +44,7 @@ func updateCommand() *cobra.Command {
 		},
 	}
 
-	return rootCmd
+	return cmd
 }
 
 func runUpdate() error {

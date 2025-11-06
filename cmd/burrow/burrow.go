@@ -37,8 +37,8 @@ type ProjectOptions struct {
 	All bool
 }
 
-func burrow() *cobra.Command {
-	rootCmd := &cobra.Command{
+func RootCmd() *cobra.Command {
+	c := &cobra.Command{
 		Version: helper.Version,
 		Use:     helper.Usage,
 		Short:   "Directory/File Creation CLI Tool",
@@ -52,12 +52,14 @@ func burrow() *cobra.Command {
 		},
 	}
 
-	rootCmd.AddCommand(updateCommand())
-	rootCmd.AddCommand(runFileStat())
+	c.AddCommand(
+		updateCommand(),
+		runFileStat(),
+	)
 
-	return rootCmd
+	return c
 }
 
 func Execute() error {
-	return burrow().Execute()
+	return RootCmd().Execute()
 }

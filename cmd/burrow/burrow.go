@@ -38,6 +38,7 @@ type ProjectOptions struct {
 }
 
 func RootCmd() *cobra.Command {
+	opts := &ProjectOptions{}
 	c := &cobra.Command{
 		Version: helper.Version,
 		Use:     helper.Usage,
@@ -54,7 +55,7 @@ func RootCmd() *cobra.Command {
 
 	c.AddCommand(
 		updateCommand(),
-		runFileStat(),
+		statCommand(opts),
 	)
 
 	return c

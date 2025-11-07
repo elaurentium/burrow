@@ -52,7 +52,7 @@ func (f *fileStatOptions) buildFileStat() *cobra.Command {
 			if opts.All {
 				entries, err := os.ReadDir(".")
 				if err != nil {
-					fmt.Errorf("error to read dir: %s", err)
+					fmt.Printf("error to read dir: %s", err)
 				}
 				var paths []string
 				for _, entry := range entries {
@@ -70,6 +70,10 @@ func (f *fileStatOptions) buildFileStat() *cobra.Command {
 	return cmd
 }
 
-func runFileStat() *cobra.Command {
-	return (&fileStatOptions{}).buildFileStat()
+func statCommand(p *ProjectOptions) *cobra.Command {
+	opts := &fileStatOptions{
+		ProjectOptions: p,
+	}
+
+	return opts.buildFileStat()
 }

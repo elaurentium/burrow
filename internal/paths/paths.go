@@ -24,48 +24,24 @@
 
 */
 
-package fs
+package paths
 
 import (
-	"fmt"
-	"os"
 	"path/filepath"
-	"sync"
+	"strings"
 
-	pt "github.com/elaurentium/burrow/internal/paths"
+	"github.com/elaurentium/burrow/internal/helper"
 )
 
-type Creator struct {
-	Perm    os.FileMode
-	Workers int
-	Wg      *sync.WaitGroup
-}
-
-func NewCreator() *Creator {
-	return &Creator{
-		Perm:    0755,
-		Workers: 0,
-		Wg:      &sync.WaitGroup{},
+func IsFile(path string) bool {
+	if filepath.Ext(path) != "" {
+		return true
 	}
-}
-
-func (c *Creator) Create(paths []string) error {
-	for _, path := range paths {
-		parent := filepath.Dir(path)
-		if parent != "." && parent != "" {
-			if err := os.MkdirAll(parent, c.Perm); err != nil {
-				fmt.Fprintf(os.Stderr, "error creating directory %s: %v\n", parent, err)
-				continue
-			}
-		}
-		if pt.IsFile(path) {
-			f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL, c.Perm)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				continue
-			}
-			f.Close()
+	base := filepath.Base(path)
+	for _, file := range helper.FilesWithoutExtension {
+		if strings.EqualFold(base, file) {
+			return true
 		}
 	}
-	return nil
+	return false
 }

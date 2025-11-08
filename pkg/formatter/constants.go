@@ -24,48 +24,16 @@
 
 */
 
-package fs
+package formatter
 
-import (
-	"fmt"
-	"os"
-	"path/filepath"
-	"sync"
-
-	pt "github.com/elaurentium/burrow/internal/paths"
+const (
+	// JSON Print in JSON format
+	JSON = "json"
+	// TemplateLegacyJSON the legacy json formatting value using go template
+	TemplateLegacyJSON = "{{json.}}"
+	// PRETTY is the constant for default formats on list commands
+	// Deprecated: use TABLE
+	PRETTY = "pretty"
+	// TABLE Print output in table format with column headers (default)
+	TABLE = "table"
 )
-
-type Creator struct {
-	Perm    os.FileMode
-	Workers int
-	Wg      *sync.WaitGroup
-}
-
-func NewCreator() *Creator {
-	return &Creator{
-		Perm:    0755,
-		Workers: 0,
-		Wg:      &sync.WaitGroup{},
-	}
-}
-
-func (c *Creator) Create(paths []string) error {
-	for _, path := range paths {
-		parent := filepath.Dir(path)
-		if parent != "." && parent != "" {
-			if err := os.MkdirAll(parent, c.Perm); err != nil {
-				fmt.Fprintf(os.Stderr, "error creating directory %s: %v\n", parent, err)
-				continue
-			}
-		}
-		if pt.IsFile(path) {
-			f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL, c.Perm)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				continue
-			}
-			f.Close()
-		}
-	}
-	return nil
-}

@@ -24,48 +24,51 @@
 
 */
 
-package fs
+package burrow
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"sync"
+	"strings"
 
-	pt "github.com/elaurentium/burrow/internal/paths"
+	"github.com/elaurentium/burrow/cmd/command"
+	"github.com/elaurentium/burrow/pkg"
+	"github.com/elaurentium/burrow/pkg/formatter"
+	"github.com/spf13/cobra"
 )
 
-type Creator struct {
-	Perm    os.FileMode
-	Workers int
-	Wg      *sync.WaitGroup
+type versionOptions struct {
+	format string
+	short  bool
 }
 
-func NewCreator() *Creator {
-	return &Creator{
-		Perm:    0755,
-		Workers: 0,
-		Wg:      &sync.WaitGroup{},
+func versionCommand(cli command.Cli) *cobra.Command {
+	opts := versionOptions{}
+	cmd := &cobra.Command{
+		Use:   "version [OPTIONS]",
+		Short: "Show burrow version information",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			runVersion(opts, cli)
+			return nil
+		},
 	}
+
+	flags := cmd.Flags()
+	flags.StringVarP(&opts.format, "format", "f", "", "Format the output. Values: [pretty | json]. (Default: pretty)")
+	flags.BoolVar(&opts.short, "short", false, "Shows only Compose's version number")
+
+	return cmd
 }
 
-func (c *Creator) Create(paths []string) error {
-	for _, path := range paths {
-		parent := filepath.Dir(path)
-		if parent != "." && parent != "" {
-			if err := os.MkdirAll(parent, c.Perm); err != nil {
-				fmt.Fprintf(os.Stderr, "error creating directory %s: %v\n", parent, err)
-				continue
-			}
-		}
-		if pt.IsFile(path) {
-			f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL, c.Perm)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				continue
-			}
-			f.Close()
-		}
+func runVersion(opts versionOptions, cli command.Cli) {
+	if opts.short {
+		_, _ = fmt.Fprintln(cli.Out(), strings.TrimPrefix(pkg.Version, "v"))
+		return
 	}
-	return nil
+	if opts.format == formatter.JSON {
+		_, _ = fmt.Fprintln(cli.Out(), "{\"version\":%q}\n", pkg.Version)
+		return
+	}
+
+	_, _ = fmt.Fprintln(cli.Out(), pkg.Version)
 }

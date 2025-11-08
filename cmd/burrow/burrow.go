@@ -27,6 +27,7 @@
 package burrow
 
 import (
+	"github.com/elaurentium/burrow/cmd/command"
 	create "github.com/elaurentium/burrow/internal/fs"
 
 	"github.com/elaurentium/burrow/internal/helper"
@@ -37,15 +38,21 @@ type ProjectOptions struct {
 	All bool
 }
 
-func RootCmd() *cobra.Command {
+func RootCmd(cli command.Cli) *cobra.Command {
 	opts := &ProjectOptions{}
+	var (
+		version bool
+	)
 	c := &cobra.Command{
-		Version: helper.Version,
-		Use:     helper.Usage,
-		Short:   "Directory/File Creation CLI Tool",
-		Long:    "Create directories and files quickly. Paths with extensions are treated as files; others as directories.",
-		Args:    cobra.ArbitraryArgs,
+		Use:   helper.Usage,
+		Short: "Directory/File Creation CLI Tool",
+		Long:  "Create directories and files quickly. Paths with extensions are treated as files; others as directories.",
+		Args:  cobra.ArbitraryArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
+			if version {
+				versionCommand(cli)
+				return nil
+			}
 			// Constructor of creator
 			creator := create.NewCreator()
 			creator.Create(args)
@@ -56,11 +63,14 @@ func RootCmd() *cobra.Command {
 	c.AddCommand(
 		updateCommand(),
 		statCommand(opts),
+		versionCommand(cli),
 	)
 
 	return c
 }
 
 func Execute() error {
-	return RootCmd().Execute()
+	cli := command.NewCli()
+	root := RootCmd(cli)
+	return root.Execute()
 }

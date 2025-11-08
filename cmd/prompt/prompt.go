@@ -24,48 +24,27 @@
 
 */
 
-package fs
+package prompt
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"sync"
+	"io"
 
-	pt "github.com/elaurentium/burrow/internal/paths"
+	"github.com/elaurentium/burrow/pkg/utils"
 )
 
-type Creator struct {
-	Perm    os.FileMode
-	Workers int
-	Wg      *sync.WaitGroup
+type Pipe struct {
+	stdout io.Writer
+	stdin  io.Reader
 }
 
-func NewCreator() *Creator {
-	return &Creator{
-		Perm:    0755,
-		Workers: 0,
-		Wg:      &sync.WaitGroup{},
-	}
+func NewPipe(stdout io.Writer, stdin io.Reader) *Pipe {
+	return &Pipe{stdout: stdout, stdin: stdin}
 }
 
-func (c *Creator) Create(paths []string) error {
-	for _, path := range paths {
-		parent := filepath.Dir(path)
-		if parent != "." && parent != "" {
-			if err := os.MkdirAll(parent, c.Perm); err != nil {
-				fmt.Fprintf(os.Stderr, "error creating directory %s: %v\n", parent, err)
-				continue
-			}
-		}
-		if pt.IsFile(path) {
-			f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL, c.Perm)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				continue
-			}
-			f.Close()
-		}
-	}
-	return nil
+func (p Pipe) Confirm(message string, defaultValue bool) (bool, error) {
+	_, _ = fmt.Fprint(p.stdout, message)
+	var answer string
+	_, _ = fmt.Fscanln(p.stdin, &answer)
+	return utils.StringToBool(answer), nil
 }

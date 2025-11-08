@@ -31,9 +31,8 @@ import (
 	"os/user"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
-
-	"golang.org/x/sys/unix"
 )
 
 // POSIX mask file types(compatibility with Mode)
@@ -110,8 +109,8 @@ func formatPermissions(mode uint32) string {
 
 // FileStat return all information about file
 func FileStat(path string) (Stat, error) {
-	var st unix.Stat_t
-	if err := unix.Lstat(path, &st); err != nil {
+	var st syscall.Stat_t
+	if err := syscall.Lstat(path, &st); err != nil {
 		return Stat{Path: path}, err
 	}
 
@@ -126,9 +125,9 @@ func FileStat(path string) (Stat, error) {
 		Size:    st.Size,
 		Blksize: int32(st.Blksize),
 		Blocks:  st.Blocks,
-		Atime:   time.Unix(int64(st.Atim.Sec), int64(st.Atim.Nsec)),
-		Mtime:   time.Unix(int64(st.Mtim.Sec), int64(st.Mtim.Nsec)),
-		Ctime:   time.Unix(int64(st.Ctim.Sec), int64(st.Ctim.Nsec)),
+		Atime:   time.Unix(int64(st.Atimespec.Sec), int64(st.Atimespec.Nsec)),
+		Mtime:   time.Unix(int64(st.Mtimespec.Sec), int64(st.Mtimespec.Nsec)),
+		Ctime:   time.Unix(int64(st.Ctimespec.Sec), int64(st.Ctimespec.Nsec)),
 		Path:    path,
 	}, nil
 }

@@ -66,7 +66,8 @@ func runVersion(opts versionOptions, cli command.Cli) {
 		return
 	}
 	if opts.format == formatter.JSON {
-		_, _ = fmt.Fprintln(cli.Out(), "{\"version\":%q}\n", pkg.Version)
+		jsonStr := fmt.Sprintf("{\"version\":%q}\n", pkg.Version)
+		_, _ = fmt.Fprintln(cli.Out(), jsonStr)
 		return
 	}
 

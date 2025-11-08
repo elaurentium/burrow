@@ -27,7 +27,6 @@
 package sync
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -39,6 +38,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/elaurentium/burrow/cmd/prompt"
 	"github.com/elaurentium/burrow/internal/helper"
 )
 
@@ -160,16 +160,13 @@ func PromptForUpdate(release *GithubRelease) (bool, error) {
 		"Release notes:\n%s\n\n",
 		helper.Name, helper.Version, release.TagName, release.Body)
 
-	fmt.Print("Do you want to update? (y/N): ")
-
-	reader := bufio.NewReader(os.Stdin)
-	response, err := reader.ReadString('\n')
+	input := prompt.NewPipe(os.Stdout, os.Stdin)
+	confirmed, err := input.Confirm("Do you want to update? (y/n): ", true)
 	if err != nil {
 		return false, fmt.Errorf("failed to read user input: %w", err)
 	}
 
-	response = strings.TrimSpace(strings.ToLower(response))
-	return response == "y" || response == "yes", nil
+	return confirmed, nil
 }
 
 // CheckAndPromptUpdate is a convenience function that checks for updates and prompts user

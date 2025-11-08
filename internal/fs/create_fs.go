@@ -68,20 +68,20 @@ func (c *Creator) Create(paths []string) error {
 		parent := filepath.Dir(path)
 		if parent != "." && parent != "" {
 			if err := os.MkdirAll(parent, c.Perm); err != nil {
-				fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", parent, err)
+				fmt.Fprintf(os.Stderr, "error creating directory %s: %v\n", parent, err)
 				continue
 			}
 		}
 		if isFile(path) {
 			f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL, c.Perm)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error creating file %s: %v\n", path, err)
+				fmt.Fprintf(os.Stderr, "%v\n", err)
 				continue
 			}
 			f.Close()
 		} else {
 			if err := os.MkdirAll(path, c.Perm); err != nil {
-				fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", path, err)
+				fmt.Fprintf(os.Stderr, "error creating directory %s: %v\n", path, err)
 			}
 		}
 	}

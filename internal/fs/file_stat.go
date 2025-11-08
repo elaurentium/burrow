@@ -124,7 +124,7 @@ func FileStat(path string) (Stat, error) {
 		Gid:     st.Gid,
 		Rdev:    uint64(st.Rdev),
 		Size:    st.Size,
-		Blksize: st.Blksize,
+		Blksize: int32(st.Blksize),
 		Blocks:  st.Blocks,
 		Atime:   time.Unix(int64(st.Atim.Sec), int64(st.Atim.Nsec)),
 		Mtime:   time.Unix(int64(st.Mtim.Sec), int64(st.Mtim.Nsec)),

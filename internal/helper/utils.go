@@ -86,7 +86,6 @@ const (
 )
 
 var (
-	Version               = "1.0.2"
 	FilesWithoutExtension = []string{
 		// Build tools
 		Makefile, CMakeLists, Rakefile, Jakefile, Gruntfile, Gulpfile,
@@ -149,16 +148,4 @@ func IsVersionNewer(latest, current string) (bool, error) {
 	}
 
 	return false, nil // Versions are equal
-}
-
-func UpdateVersion(version string) (string, error) {
-	if version == "" {
-		return "", fmt.Errorf("the version is empty. something went wrong with the release")
-	}
-
-	release := fmt.Sprintf("burrow: %s", version)
-
-	Version = release
-
-	return release, nil
 }

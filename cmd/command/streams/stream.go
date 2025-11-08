@@ -24,48 +24,36 @@
 
 */
 
-package fs
+package streams
 
-import (
-	"fmt"
-	"os"
-	"path/filepath"
-	"sync"
+import "github.com/moby/term"
 
-	pt "github.com/elaurentium/burrow/internal/paths"
-)
-
-type Creator struct {
-	Perm    os.FileMode
-	Workers int
-	Wg      *sync.WaitGroup
+type commonStream struct {
+	fd         uintptr
+	isTerminal bool
+	state      *term.State
 }
 
-func NewCreator() *Creator {
-	return &Creator{
-		Perm:    0755,
-		Workers: 0,
-		Wg:      &sync.WaitGroup{},
+// FD returns the file descriptor number for this stream.
+func (s *commonStream) FD() uintptr {
+	return s.fd
+}
+
+// IsTerminal returns true if this stream is connected to a terminal.
+func (s *commonStream) IsTerminal() bool {
+	return s.isTerminal
+}
+
+// RestoreTerminal restores normal mode to the terminal.
+func (s *commonStream) RestoreTerminal() {
+	if s.state != nil {
+		_ = term.RestoreTerminal(s.fd, s.state)
 	}
 }
 
-func (c *Creator) Create(paths []string) error {
-	for _, path := range paths {
-		parent := filepath.Dir(path)
-		if parent != "." && parent != "" {
-			if err := os.MkdirAll(parent, c.Perm); err != nil {
-				fmt.Fprintf(os.Stderr, "error creating directory %s: %v\n", parent, err)
-				continue
-			}
-		}
-		if pt.IsFile(path) {
-			f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL, c.Perm)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				continue
-			}
-			f.Close()
-		}
-	}
-	return nil
+// SetIsTerminal overrides whether a terminal is connected. It is used to
+// override this property in unit-tests, and should not be depended on for
+// other purposes.
+func (s *commonStream) SetIsTerminal(isTerminal bool) {
+	s.isTerminal = isTerminal
 }

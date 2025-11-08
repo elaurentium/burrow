@@ -40,6 +40,7 @@ import (
 
 	"github.com/elaurentium/burrow/cmd/prompt"
 	"github.com/elaurentium/burrow/internal/helper"
+	"github.com/elaurentium/burrow/pkg"
 )
 
 type GithubRelease struct {
@@ -74,7 +75,7 @@ func CheckForUpdates() (*GithubRelease, bool, error) {
 		return nil, false, fmt.Errorf("error checking for updates: %v", err)
 	}
 
-	currentVersion := helper.Version
+	currentVersion := pkg.Version
 	latestVersion := strings.TrimPrefix(release.TagName, "v")
 	if release.TagName != currentVersion {
 		return &release, true, nil
@@ -158,7 +159,7 @@ func PromptForUpdate(release *GithubRelease) (bool, error) {
 		"Current version: v%s\n"+
 		"Latest version: %s\n\n"+
 		"Release notes:\n%s\n\n",
-		helper.Name, helper.Version, release.TagName, release.Body)
+		helper.Name, pkg.Version, release.TagName, release.Body)
 
 	input := prompt.NewPipe(os.Stdout, os.Stdin)
 	confirmed, err := input.Confirm("Do you want to update? (y/n): ", true)
@@ -192,10 +193,6 @@ func CheckAndPromptUpdate() error {
 		return PerformUpdate(release)
 	}
 
-	if _, err := helper.UpdateVersion(release.TagName); err != nil {
-		return fmt.Errorf("failed to update version: %w", err)
-	}
-
 	fmt.Println("Update cancelled by user")
 	return nil
 }
@@ -210,7 +207,7 @@ func CheckForUpdatesQuietly() {
 
 	if hasUpdate {
 		fmt.Printf("New version available: %s (current: %s)\n",
-			release.TagName, helper.Version)
+			release.TagName, pkg.Version)
 		fmt.Println("Run with --update flag to update")
 	}
 }

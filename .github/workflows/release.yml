@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux, darwin, windows]
+        goos: [linux, darwin]
         goarch: [amd64, arm64]
         exclude:
           - goos: windows
@@ -36,9 +36,6 @@ jobs:
         run: |
           mkdir -p dist
           BIN="burrow-${GOOS}-${GOARCH}"
-          if [ "${GOOS}" = "windows" ]; then
-            BIN="${BIN}.exe"
-          fi
           echo "Building ${BIN}..."
           go build -trimpath -ldflags="-s -w" -o "dist/${BIN}" ./cmd
           echo "File info:"

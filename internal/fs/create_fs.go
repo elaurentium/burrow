@@ -65,23 +65,20 @@ func isFile(path string) bool {
 
 func (c *Creator) Create(paths []string) error {
 	for _, path := range paths {
-		if _, err := os.Stat(path); err == nil {
-			fmt.Fprintf(os.Stdout, "Path already exists: %s\n", path)
-			continue
-		}
 		parent := filepath.Dir(path)
 		if parent != "." && parent != "" {
-			if _, err := os.Stat(parent); os.IsNotExist(err) {
-				if err := os.MkdirAll(parent, c.Perm); err != nil {
-					fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", parent, err)
-					continue
-				}
+			if err := os.MkdirAll(parent, c.Perm); err != nil {
+				fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", parent, err)
+				continue
 			}
 		}
 		if isFile(path) {
-			if _, err := os.Create(path); err != nil {
+			f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL, c.Perm)
+			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error creating file %s: %v\n", path, err)
+				continue
 			}
+			f.Close()
 		} else {
 			if err := os.MkdirAll(path, c.Perm); err != nil {
 				fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", path, err)

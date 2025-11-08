@@ -114,6 +114,8 @@ func FileStat(path string) (Stat, error) {
 		return Stat{Path: path}, err
 	}
 
+	at, mt, ct := timesFromStat(st)
+
 	return Stat{
 		Dev:     uint64(st.Dev),
 		Ino:     st.Ino,
@@ -125,9 +127,9 @@ func FileStat(path string) (Stat, error) {
 		Size:    st.Size,
 		Blksize: int32(st.Blksize),
 		Blocks:  st.Blocks,
-		Atime:   time.Unix(int64(st.Atimespec.Sec), int64(st.Atimespec.Nsec)),
-		Mtime:   time.Unix(int64(st.Mtimespec.Sec), int64(st.Mtimespec.Nsec)),
-		Ctime:   time.Unix(int64(st.Ctimespec.Sec), int64(st.Ctimespec.Nsec)),
+		Atime:   at,
+		Mtime:   mt,
+		Ctime:   ct,
 		Path:    path,
 	}, nil
 }

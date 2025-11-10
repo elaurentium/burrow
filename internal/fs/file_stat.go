@@ -164,7 +164,7 @@ func StatInfo(paths []string) error {
 			timeStr = mtime.Format("Jan _2 15:04")
 		}
 
-		fmt.Printf("%s %d %s %s %d %s %s\n",
+		fmt.Printf("%s %2d %6s %6s %4d %12s %s\n",
 			formatPermissions(st.Mode), st.Nlink, username, groupname, st.Size, timeStr, st.Path,
 		)
 	}

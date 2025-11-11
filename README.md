@@ -34,6 +34,12 @@ b src/main.go
 curl -fsSL https://raw.githubusercontent.com/elaurentium/burrow/main/install.sh | bash
 ```
 
+# Update
+```bash
+# To update you must run as admin
+sudo b update
+```
+
 ## How to contributing
 Pull request are ever welcome. For major changes, please open an issue to discuss your proposal and what you'd like to change.
 

@@ -35,9 +35,14 @@ jobs:
           CGO_ENABLED: 0
         run: |
           mkdir -p dist
-          BIN="burrow-${GOOS}-${GOARCH}"
+          EXE=""
+          if [ "${GOOS}" = "windows" ]; then
+            EXE=".exe"
+          fi
+          BIN="burrow-${GOOS}-${GOARCH}${EXE}"
           echo "Building ${BIN}..."
-          go build -trimpath -ldflags="-s -w" -o "dist/${BIN}" ./cmd
+          # explicit env prefix garante cross-compile correto
+          GOOS="${GOOS}" GOARCH="${GOARCH}" CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "dist/${BIN}" ./cmd
           echo "File info:"
           file "dist/${BIN}" || true
           ls -lh dist/

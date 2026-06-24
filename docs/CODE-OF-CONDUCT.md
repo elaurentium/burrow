@@ -44,7 +44,7 @@ Examples include using an official project e-mail address, posting via an offici
 
 # Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project maintainers at [your-contact@email.com].
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project maintainers at [evan.limeira@gmail.com].
 
 All maintainers are obligated to respect the privacy and security of the reporter of any incident.
 
